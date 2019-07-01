@@ -17,6 +17,9 @@ public class MulInput {
         final ParameterTool params = ParameterTool.fromArgs(args);
 
         // set up the execution environment
+        if (params.get("input")!=null){
+
+        }
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // make parameters available in the web interface

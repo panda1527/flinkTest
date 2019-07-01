@@ -4,48 +4,72 @@ import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.streaming.api.TimeCharacteristic;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
+import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Collector;
 
+//import dataSource.Write;
 public class SinleInput {
 
     public static void main(String[] args) throws Exception {
 
         // Checking input parameters
-        long startTime = System.currentTimeMillis();
         final ParameterTool params = ParameterTool.fromArgs(args);
 
         // set up the execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // make parameters available in the web interface
+        System.out.println("-input <path>设置数据源文件路径；初次运行添加参数-init true生成数据源；-output <path>设置sink文件夹(可选)；-para <num>设置并行数（可选)");
         env.getConfig().setGlobalJobParameters(params);
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         // get input data
-        SingleOutputStreamOperator<Tuple4<Long, Integer, Double, Double>> reducedStream = env.readTextFile("G:\\stream1.txt")
-                .assignTimestampsAndWatermarks(
-                        new BoundedOutOfOrdernessTimestampExtractor<String>(Time.milliseconds(10)) {
-                            @Override
-                            public long extractTimestamp(String s) {
-                                String[] tokens = s.split(" ");
-                                long time = Long.parseLong(tokens[0]) * 1000;
-                                return time;
-                            }
-                        })
+        DataStreamSource<String> Source;
+        String input = params.get("input");
+        int num=Integer.parseInt(params.get("input"));
+        if (input != null) {
+            if (params.get("init") == "ture") {
+                System.out.println("初始化生成数据源");
+                dataSource.Write.createStream(input,num);
+            }
+            Source = env.readTextFile(input);
+        } else {
+            System.out.println("请使用-input path设置输入参数");
+            return;
+        }
+        if (params.get("para") != null) {
+            int parallelism = Integer.parseInt(params.get("para"));
+            env.setParallelism(parallelism);   //设置并行数
+        }
+
+//        SingleOutputStreamOperator<Tuple4<Long, Integer, Double, Double>> reducedStream = env.readTextFile("D:\\stream2.txt")
+        SingleOutputStreamOperator<Tuple4<Long, Integer, Double, Double>> reducedStream = Source.assignTimestampsAndWatermarks(
+                new BoundedOutOfOrdernessTimestampExtractor<String>(Time.milliseconds(0)) {
+                    @Override
+                    public long extractTimestamp(String s) {
+                        String[] tokens = s.split(" ");
+                        long time = Long.parseLong(tokens[0]) * 1000;
+                        return time;
+                    }
+                })
                 .flatMap(new Tokenizer())
                 .keyBy(1)
-                .window(TumblingEventTimeWindows.of(Time.seconds(10)))
+//                .window(TumblingEventTimeWindows.of(Time.seconds(1000)))
+//                .window(TumblingEventTimeWindows.of(Time.seconds(100)))
+                .window(SlidingEventTimeWindows.of(Time.seconds(1000), Time.seconds(100)))
                 .reduce(new ReduceFunction<Tuple4<Long, Integer, Double, Double>>() {
                     @Override
                     public Tuple4<Long, Integer, Double, Double> reduce(Tuple4<Long, Integer, Double, Double> t1, Tuple4<Long, Integer, Double, Double> t2) throws Exception {
+
                         if (t1.f0 > t2.f0) {
-                            System.out.println(t1);
+//                            System.out.println(t1);
                             return t1;
                         } else {
+//                            System.out.println(t2);
                             return t2;
                         }
                     }
@@ -55,13 +79,19 @@ public class SinleInput {
         // emit result
 //        System.out.println("开始sink至文件");
 //        counts.writeAsText("E:\\Desktop\\result1", FileSystem.WriteMode.OVERWRITE);
-        reducedStream.writeAsText("E:\\Desktop\\result1", FileSystem.WriteMode.OVERWRITE);
-//        counts.print();
-        // execute program
+        String output = params.get("output");
+        String sink;
+        if (output != null) {
+            sink="sink至文件";
+            reducedStream.writeAsText(output, FileSystem.WriteMode.OVERWRITE);
+        } else {
+            System.out.println("未设置output路径，无sink");
+            sink="无sink";
+        }
+        long startTime = System.currentTimeMillis();
         env.execute("Streaming WordCount");
-
         long endTime = System.currentTimeMillis();
-        System.out.println("单文件" + env.getParallelism() + "线程无sink总耗时" + (endTime - startTime));
+        System.out.println("1.6G，3600W记录文件1000s长度滑动窗口，100s滑动一次，" + env.getParallelism() + "线程"+sink+"总耗时" + (endTime - startTime));
     }
 
     public static final class Tokenizer implements FlatMapFunction<String, Tuple4<Long, Integer, Double, Double>> {
@@ -86,5 +116,4 @@ public class SinleInput {
             }
         }
     }
-
 }

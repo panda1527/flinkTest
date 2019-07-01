@@ -9,7 +9,7 @@ import java.util.Random;
 
 public class Write {
     public static int last_time = 0;
-    public static double speed = 5.0/60/6;  //速度为2dis/1h，即（5/60/6）dis/10s，dis为lat方加lon方之和开方
+    public static double speed = 5.0 / 60 / 6;  //速度为2dis/1h，即（5/60/6）dis/10s，dis为lat方加lon方之和开方
 
     public static class City {
         //        String name;
@@ -129,7 +129,7 @@ public class Write {
             return "id=" + id +
                     ", type=" + type +
                     ", start_time1=" + start_time1 +
-                    "path=" + start_city +"-"+first_transfer +"-"+ last_transfer +"-"+ end_city +
+                    "path=" + start_city + "-" + first_transfer + "-" + last_transfer + "-" + end_city +
                     ", buyer=" + buyer +
                     ", seller=" + seller;
         }
@@ -141,44 +141,45 @@ public class Write {
         return Math.sqrt(Math.pow((lon1 - lon2), 2) + Math.pow((lat1 - lat2), 2));
     }
 
-    public static City[] createCities(int num, String outputFile) throws IOException {
+    //    public static City[] createCities(int num, String outputFile) throws IOException {
+    public static City[] createCities(int num) throws IOException {
         City[] cities = new City[num];
         boolean bool = false;
         Random r1 = new Random(1);
         Random r2 = new Random(2);
         double lon, lat;
-        try {
-            // lon范围100-120；lat范围23-40
-            createFile(outputFile);
-            File file = new File(outputFile);
-            FileOutputStream out = new FileOutputStream(file);
-            BufferedOutputStream Buff = new BufferedOutputStream(out);
-            for (int i = 0; i < num / 10; i++) {
-                lon = r1.nextDouble() * 20 + 100;
-                lat = r2.nextDouble() * 17 + 23;
-                cities[i] = new City(i, true, lon, lat, i);
-                Buff.write((cities[i].toString() + "\r\n").getBytes());
-            }
-            for (int i = num / 10; i < num; i++) {
-                lon = r1.nextDouble() * 20 + 100;
-                lat = r2.nextDouble() * 17 + 23;
-                cities[i] = new City(i, false, lon, lat);
-                double dis = dis(lon, lat, cities[0].lon, cities[0].lat);
-                int nearest = 0;
-                for (int j = 1; j < num / 10; j++) {
-                    if (dis(lon, lat, cities[j].lon, cities[j].lat) < dis) {
-                        dis = dis(lon, lat, cities[j].lon, cities[j].lat);
-                        nearest = j;
-                    }
-                }
-                cities[i].nearestCenter = nearest;
-                Buff.write((cities[i].toString() + "\r\n").getBytes());
-            }
-            Buff.flush();
-            Buff.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+//        try {
+//            // lon范围100-120；lat范围23-40
+//            createFile(outputFile);
+//            File file = new File(outputFile);
+//            FileOutputStream out = new FileOutputStream(file);
+//            BufferedOutputStream Buff = new BufferedOutputStream(out);
+        for (int i = 0; i < num / 10; i++) {
+            lon = r1.nextDouble() * 20 + 100;
+            lat = r2.nextDouble() * 17 + 23;
+            cities[i] = new City(i, true, lon, lat, i);
+//                Buff.write((cities[i].toString() + "\r\n").getBytes());
         }
+        for (int i = num / 10; i < num; i++) {
+            lon = r1.nextDouble() * 20 + 100;
+            lat = r2.nextDouble() * 17 + 23;
+            cities[i] = new City(i, false, lon, lat);
+            double dis = dis(lon, lat, cities[0].lon, cities[0].lat);
+            int nearest = 0;
+            for (int j = 1; j < num / 10; j++) {
+                if (dis(lon, lat, cities[j].lon, cities[j].lat) < dis) {
+                    dis = dis(lon, lat, cities[j].lon, cities[j].lat);
+                    nearest = j;
+                }
+            }
+            cities[i].nearestCenter = nearest;
+//                Buff.write((cities[i].toString() + "\r\n").getBytes());
+        }
+//            Buff.flush();
+//            Buff.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         return cities;
     }
 
@@ -199,7 +200,8 @@ public class Write {
         return bool;
     }
 
-    public static Order[] createOrders(City[] cities, int num, String outputFile) throws IOException {
+    //    public static Order[] createOrders(City[] cities, int num, String outputFile) throws IOException {
+    public static Order[] createOrders(City[] cities, int num) throws IOException {
         System.out.println(speed);
         Order[] orders = new Order[num];
         Random rType = new Random(1);
@@ -214,41 +216,43 @@ public class Write {
         int end_city;
         int buyer;
         int seller;
-        try {
-            // lon范围100-120；lat范围23-40
-            createFile(outputFile);
-            File file = new File(outputFile);
-            FileOutputStream out = new FileOutputStream(file);
-            BufferedOutputStream Buff = new BufferedOutputStream(out);
-            for (int i = 0; i < num; i++) {
-                type = rType.nextInt(10);
-                start_time1 = rTime.nextInt(24 * 60 * 6);     //一天内随机下单，时间单位为10s
-                start_city = rStart.nextInt(1000);
-                end_city = rEnd.nextInt(1000);
-                buyer = rBuyer.nextInt(100000);   //十万个买家
-                seller = rSeller.nextInt(1000);   //一千个卖家
-                orders[i] = new Order(i, type, start_time1, start_city, end_city, buyer, seller, false);
-                orders[i].first_transfer = cities[orders[i].start_city].nearestCenter;
-                orders[i].last_transfer = cities[orders[i].end_city].nearestCenter;
-                orders[i].arrive_time1 = orders[i].start_time1 + (int) (dis(cities[orders[i].start_city].lon, cities[orders[i].start_city].lat, cities[orders[i].first_transfer].lon, cities[orders[i].first_transfer].lat) / speed);
-                orders[i].start_time2 = 2 * orders[i].arrive_time1 - orders[i].start_time1;
-                orders[i].arrive_time2 = orders[i].start_time2 + (int) (dis(cities[orders[i].first_transfer].lon, cities[orders[i].first_transfer].lat, cities[orders[i].last_transfer].lon, cities[orders[i].last_transfer].lat) / speed);
-                orders[i].start_time3 = 2 * orders[i].arrive_time2 - orders[i].start_time2;
-                orders[i].arrive_time3 = orders[i].start_time3 + (int) (dis(cities[orders[i].last_transfer].lon, cities[orders[i].last_transfer].lat, cities[orders[i].end_city].lon, cities[orders[i].end_city].lat) / speed);
-                if (last_time < orders[i].arrive_time3){
-                    last_time = orders[i].arrive_time3;
-                }
-                Buff.write((orders[i].toString() + "\r\n").getBytes());
+//        try {
+//            // lon范围100-120；lat范围23-40
+//            createFile(outputFile);
+//            File file = new File(outputFile);
+//            FileOutputStream out = new FileOutputStream(file);
+//            BufferedOutputStream Buff = new BufferedOutputStream(out);
+        for (int i = 0; i < num; i++) {
+            type = rType.nextInt(10);
+            start_time1 = rTime.nextInt(24 * 60 * 6);     //一天内随机下单，时间单位为10s
+            start_city = rStart.nextInt(1000);
+            end_city = rEnd.nextInt(1000);
+            buyer = rBuyer.nextInt(100000);   //十万个买家
+            seller = rSeller.nextInt(1000);   //一千个卖家
+            orders[i] = new Order(i, type, start_time1, start_city, end_city, buyer, seller, false);
+            orders[i].first_transfer = cities[orders[i].start_city].nearestCenter;
+            orders[i].last_transfer = cities[orders[i].end_city].nearestCenter;
+            orders[i].arrive_time1 = orders[i].start_time1 + (int) (dis(cities[orders[i].start_city].lon, cities[orders[i].start_city].lat, cities[orders[i].first_transfer].lon, cities[orders[i].first_transfer].lat) / speed);
+            orders[i].start_time2 = 2 * orders[i].arrive_time1 - orders[i].start_time1;
+            orders[i].arrive_time2 = orders[i].start_time2 + (int) (dis(cities[orders[i].first_transfer].lon, cities[orders[i].first_transfer].lat, cities[orders[i].last_transfer].lon, cities[orders[i].last_transfer].lat) / speed);
+            orders[i].start_time3 = 2 * orders[i].arrive_time2 - orders[i].start_time2;
+            orders[i].arrive_time3 = orders[i].start_time3 + (int) (dis(cities[orders[i].last_transfer].lon, cities[orders[i].last_transfer].lat, cities[orders[i].end_city].lon, cities[orders[i].end_city].lat) / speed);
+            if (last_time < orders[i].arrive_time3) {
+                last_time = orders[i].arrive_time3;
             }
-            Buff.flush();
-            Buff.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+//                Buff.write((orders[i].toString() + "\r\n").getBytes());
         }
+//            Buff.flush();
+//            Buff.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         return orders;
     }
 
-    public static void createStream(City[] cities, Order[] orders, String outputFile) throws IOException {
+    public static void createStream(String outputFile,int ordersNum) throws IOException {
+        City[] cities = createCities(1000);    //生成城市信息保存文件
+        Order[] orders = createOrders(cities, ordersNum); //生成订单信息保存文件
         int len = orders.length;
         int order_id;
         double lon;
@@ -257,7 +261,7 @@ public class Write {
         File file = new File(outputFile);
         FileOutputStream out = new FileOutputStream(file);
         BufferedOutputStream Buff = new BufferedOutputStream(out);
-        int count=0;
+        int count = 0;
         try {
             for (int time = 0; time <= last_time; time++) {
                 for (int i = 0; i < len; i++) {
@@ -265,45 +269,41 @@ public class Write {
                         if (time < orders[i].start_time1) {
                             lon = cities[orders[i].start_city].lon;
                             lat = cities[orders[i].start_city].lat;
-//                            Buff.write(("time=" + time+"id=" + i + ",lon=" + lon + ",lat=" + lat + "\r\n").getBytes());
-                            Buff.write((time+" " + i + " " + lon + " " + lat + "\r\n").getBytes());
-                        }else if (time >= orders[i].start_time1 && time <= orders[i].arrive_time1) {
+                            Buff.write((time + " " + i + " " + lon + " " + lat + "\r\n").getBytes());
+                        } else if (time >= orders[i].start_time1 && time <= orders[i].arrive_time1) {
                             lon = cities[orders[i].start_city].lon + (cities[orders[i].first_transfer].lon - cities[orders[i].start_city].lon) * (time - orders[i].start_time1) / (orders[i].arrive_time1 - orders[i].start_time1);
                             lat = cities[orders[i].start_city].lat + (cities[orders[i].first_transfer].lat - cities[orders[i].start_city].lat) * (time - orders[i].start_time1) / (orders[i].arrive_time1 - orders[i].start_time1);
-//                            Buff.write(("time=" + time+"id=" + i + ",lon=" + lon + ",lat=" + lat + "\r\n").getBytes());
-                            Buff.write((time+" " + i + " " + lon + " " + lat + "\r\n").getBytes());
+                            Buff.write((time + " " + i + " " + lon + " " + lat + "\r\n").getBytes());
                         } else if (time >= orders[i].arrive_time1 && time <= orders[i].start_time2) {
-                            lon=cities[orders[i].first_transfer].lon;
-                            lat=cities[orders[i].first_transfer].lat;
-//                            Buff.write(("time=" + time+"id=" + i + ",lon=" + lon + ",lat=" + lat + "\r\n").getBytes());
-                            Buff.write((time+" " + i + " " + lon + " " + lat + "\r\n").getBytes());
-                        }else if (time >= orders[i].start_time2 && time <= orders[i].arrive_time2) {
+                            lon = cities[orders[i].first_transfer].lon;
+                            lat = cities[orders[i].first_transfer].lat;
+                            Buff.write((time + " " + i + " " + lon + " " + lat + "\r\n").getBytes());
+                        } else if (time >= orders[i].start_time2 && time <= orders[i].arrive_time2) {
                             lon = cities[orders[i].first_transfer].lon + (cities[orders[i].last_transfer].lon - cities[orders[i].first_transfer].lon) * (time - orders[i].start_time2) / (orders[i].arrive_time2 - orders[i].start_time2);
                             lat = cities[orders[i].first_transfer].lat + (cities[orders[i].last_transfer].lat - cities[orders[i].first_transfer].lat) * (time - orders[i].start_time2) / (orders[i].arrive_time2 - orders[i].start_time2);
-//                            Buff.write(("time=" + time+"id=" + i + ",lon=" + lon + ",lat=" + lat + "\r\n").getBytes());
-                            Buff.write((time+" " + i + " " + lon + " " + lat + "\r\n").getBytes());
-                        }else if (time >= orders[i].arrive_time2 && time <= orders[i].start_time3) {
-                            lon=cities[orders[i].last_transfer].lon;
-                            lat=cities[orders[i].last_transfer].lat;
-                            Buff.write((time+" " + i + " " + lon + " " + lat + "\r\n").getBytes());
-                        }else if (time >= orders[i].start_time3 && time <= orders[i].arrive_time3) {
+                            Buff.write((time + " " + i + " " + lon + " " + lat + "\r\n").getBytes());
+                        } else if (time >= orders[i].arrive_time2 && time <= orders[i].start_time3) {
+                            lon = cities[orders[i].last_transfer].lon;
+                            lat = cities[orders[i].last_transfer].lat;
+                            Buff.write((time + " " + i + " " + lon + " " + lat + "\r\n").getBytes());
+                        } else if (time >= orders[i].start_time3 && time <= orders[i].arrive_time3) {
                             lon = cities[orders[i].last_transfer].lon + (cities[orders[i].end_city].lon - cities[orders[i].last_transfer].lon) * (time - orders[i].start_time3) / (orders[i].arrive_time3 - orders[i].start_time3);
                             lat = cities[orders[i].last_transfer].lat + (cities[orders[i].end_city].lat - cities[orders[i].last_transfer].lat) * (time - orders[i].start_time3) / (orders[i].arrive_time3 - orders[i].start_time3);
-//                            Buff.write(("time=" + time+"id=" + i + ",lon=" + lon + ",lat=" + lat + "\r\n").getBytes());
-                            Buff.write((time+" " + i + " " + lon + " " + lat + "\r\n").getBytes());
-                        }else {
-                            orders[i].done=true;
+                            Buff.write((time + " " + i + " " + lon + " " + lat + "\r\n").getBytes());
+                        } else {
+                            orders[i].done = true;
                         }
-                    }else {
+                    } else {
                         lon = cities[orders[i].end_city].lon;
                         lat = cities[orders[i].end_city].lat;
-                        Buff.write((time+" " + i + " " + lon + " " + lat + "\r\n").getBytes());
+                        Buff.write((time + " " + i + " " + lon + " " + lat + "\r\n").getBytes());
                     }
                     count++;
+
                 }
 //                System.out.println(time*10+"秒各订单定位输出完成");
             }
-            System.out.println("生成流数量"+count);
+            System.out.println("生成流数量" + count);
             Buff.flush();
             Buff.close();
         } catch (IOException e) {
@@ -312,13 +312,8 @@ public class Write {
     }
 
     public static void main(String[] args) throws IOException {
-        System.out.println("开始程序");
-        City[] cities = createCities(1000, "E:\\Desktop\\city.txt");    //生成城市信息保存文件
-        System.out.println("生成城市完成");
-        Order[] orders = createOrders(cities, 10000, "E:\\Desktop\\orders.txt"); //生成订单信息保存文件
-        System.out.println("生成订单完成");
         System.out.println(last_time);
-        createStream(cities,orders,"G:\\stream1.txt");   //生成数据流信息保存文件
+        createStream("D:\\stream1.txt");   //生成数据流信息保存文件
         System.out.println("程序结束");
     }
 }
