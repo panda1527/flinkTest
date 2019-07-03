@@ -249,7 +249,7 @@ public class Write {
         return orders;
     }
 
-    public static void createStream(String outputFile,int ordersNum) throws IOException {
+    public static int createStream(String outputFile,int ordersNum) throws IOException {
         System.out.println("开始生产数据流");
         City[] cities = createCities(1000);    //生成城市信息保存文件
 
@@ -310,6 +310,7 @@ public class Write {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return count;
     }
 
     public static void main(String[] args) throws IOException {

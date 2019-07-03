@@ -91,7 +91,12 @@ public class SinleInput {
         long startTime = System.currentTimeMillis();
         env.execute("Streaming WordCount");
         long endTime = System.currentTimeMillis();
-        System.out.println(Integer.parseInt(init)+"条记录文件1000s长度滑动窗口，100s滑动一次，" + env.getParallelism() + "线程"+sink+"总耗时" + (endTime - startTime));
+        if(init.equals("")||init==null||init==""){
+            System.out.println("1000s长度滑动窗口，100s滑动一次，" + env.getParallelism() + "线程"+sink+"总耗时" + (endTime - startTime));
+        }else{
+            System.out.println(Integer.parseInt(init)+"条记录文件1000s长度滑动窗口，100s滑动一次，" + env.getParallelism() + "线程"+sink+"总耗时" + (endTime - startTime));
+        }
+
     }
 
     public static final class Tokenizer implements FlatMapFunction<String, Tuple4<Long, Integer, Double, Double>> {
