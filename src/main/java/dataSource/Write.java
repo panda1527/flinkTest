@@ -202,7 +202,6 @@ public class Write {
 
     //    public static Order[] createOrders(City[] cities, int num, String outputFile) throws IOException {
     public static Order[] createOrders(City[] cities, int num) throws IOException {
-        System.out.println(speed);
         Order[] orders = new Order[num];
         Random rType = new Random(1);
         Random rTime = new Random(2);
@@ -251,8 +250,10 @@ public class Write {
     }
 
     public static void createStream(String outputFile,int ordersNum) throws IOException {
+        System.out.println("开始生产数据流");
         City[] cities = createCities(1000);    //生成城市信息保存文件
-        Order[] orders = createOrders(cities, ordersNum); //生成订单信息保存文件
+
+        Order[] orders = createOrders(cities, ordersNum/12000); //生成订单信息保存文件
         int len = orders.length;
         int order_id;
         double lon;
@@ -313,7 +314,7 @@ public class Write {
 
     public static void main(String[] args) throws IOException {
         System.out.println(last_time);
-        createStream("D:\\stream1.txt");   //生成数据流信息保存文件
+        createStream("D:\\stream1.txt",3000);   //生成数据流信息保存文件
         System.out.println("程序结束");
     }
 }

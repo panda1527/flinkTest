@@ -22,19 +22,19 @@ public class SinleInput {
 
         // set up the execution environment
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-
         // make parameters available in the web interface
-        System.out.println("-input <path>设置数据源文件路径；初次运行添加参数-init true生成数据源；-output <path>设置sink文件夹(可选)；-para <num>设置并行数（可选)");
+        System.out.println("-input <path>设置数据源文件路径（必需）；初次运行添加参数-init <num>生成num条流数据，每条数据大概40B；-output <path>设置sink文件夹(可选)；-para <num>设置并行数（可选)");
         env.getConfig().setGlobalJobParameters(params);
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         // get input data
         DataStreamSource<String> Source;
         String input = params.get("input");
-        int num=Integer.parseInt(params.get("input"));
+        String init = params.get("init");
+//        int num=Integer.parseInt(params.get("num"));
         if (input != null) {
-            if (params.get("init") == "ture") {
+            if (init != null) {
                 System.out.println("初始化生成数据源");
-                dataSource.Write.createStream(input,num);
+                dataSource.Write.createStream(input,Integer.parseInt(init));
             }
             Source = env.readTextFile(input);
         } else {
@@ -91,7 +91,7 @@ public class SinleInput {
         long startTime = System.currentTimeMillis();
         env.execute("Streaming WordCount");
         long endTime = System.currentTimeMillis();
-        System.out.println("1.6G，3600W记录文件1000s长度滑动窗口，100s滑动一次，" + env.getParallelism() + "线程"+sink+"总耗时" + (endTime - startTime));
+        System.out.println("1.6G，"+Integer.parseInt(init)+"条记录文件1000s长度滑动窗口，100s滑动一次，" + env.getParallelism() + "线程"+sink+"总耗时" + (endTime - startTime));
     }
 
     public static final class Tokenizer implements FlatMapFunction<String, Tuple4<Long, Integer, Double, Double>> {
