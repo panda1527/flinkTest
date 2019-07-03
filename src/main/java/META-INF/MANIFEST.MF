@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Class-Path: scopt_2.12-3.5.0.jar flink-annotations-1.8.0.jar snappy-ja
+ va-1.1.4.jar jsr305-1.3.9.jar reactive-streams-1.0.0.jar flink-hadoop
+ -fs-1.8.0.jar log4j-1.2.17.jar akka-actor_2.12-2.4.20.jar scala-libra
+ ry-2.12.7.jar commons-lang3-3.3.2.jar flink-runtime_2.12-1.8.0-tests.
+ jar flink-runtime_2.12-1.8.0.jar commons-io-2.4.jar slf4j-nop-1.7.2.j
+ ar flink-shaded-asm-6-6.2.1-6.0.jar flink-test-utils_2.12-1.8.0.jar z
+ ookeeper-3.4.8.jar flink-optimizer_2.12-1.8.0.jar flink-clients_2.12-
+ 1.8.0.jar flink-metrics-core-1.8.0.jar kryo-2.24.0.jar slf4j-api-1.7.
+ 15.jar minlog-1.2.jar flink-shaded-netty-4.1.32.Final-6.0.jar config-
+ 1.3.0.jar commons-collections-3.2.2.jar akka-protobuf_2.12-2.4.20.jar
+  flink-test-utils-junit-1.8.0.jar flink-shaded-guava-18.0-6.0.jar obj
+ enesis-2.1.jar curator-test-2.12.0.jar commons-compress-1.18.jar flin
+ k-java-1.8.0.jar chill_2.12-0.7.6.jar akka-stream_2.12-2.4.20.jar fli
+ nk-core-1.8.0.jar flink-shaded-asm-5.0.4-6.0.jar force-shading-1.8.0.
+ jar flink-streaming-java_2.12-1.8.0.jar jline-0.9.94.jar commons-math
+ 3-3.5.jar guava-16.0.1.jar commons-cli-1.3.1.jar akka-slf4j_2.12-2.4.
+ 20.jar scala-java8-compat_2.12-0.8.0.jar scala-parser-combinators_2.1
+ 2-1.0.4.jar javassist-3.19.0-GA.jar flink-shaded-jackson-2.7.9-6.0.ja
+ r netty-3.7.0.Final.jar flink-queryable-state-client-java_2.12-1.8.0.
+ jar chill-java-0.7.6.jar grizzled-slf4j_2.12-1.3.2.jar ssl-config-cor
+ e_2.12-0.2.1.jar
+Main-Class: TumblingWindows
+
